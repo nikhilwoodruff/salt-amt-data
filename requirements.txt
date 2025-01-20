@@ -1,0 +1,2 @@
+policyengine-us==1.177.0
+huggingface_hub
