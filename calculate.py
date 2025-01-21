@@ -5,7 +5,9 @@ import numpy as np
 from itertools import product
 import os
 from huggingface_hub import hf_hub_download, login, HfApi
-import os
+import sys
+
+print_ = lambda text: print(text, file=sys.stderr)
 
 def upload(local_file_path: str, repo: str, repo_file_path: str):
     token = os.environ.get(
@@ -1555,10 +1557,10 @@ def calculate_metrics(reform_sim, baseline_data, year):
         # Worse off: lost more than 0.1%
         worse_off = (income_change < -1e-3) & in_decile
 
-        print(f"Decile {i}:")
-        print(f"  Number in decile: {sum(in_decile)}")
-        print(f"  Number better off: {sum(better_off)}")
-        print(f"  Number worse off: {sum(worse_off)}")
+        print_(f"Decile {i}:")
+        print_(f"  Number in decile: {sum(in_decile)}")
+        print_(f"  Number better off: {sum(better_off)}")
+        print_(f"  Number worse off: {sum(worse_off)}")
 
         # Use loc to ensure index alignment
         better_off_sum = people.loc[better_off].sum()
@@ -1610,7 +1612,7 @@ def calculate_impacts(year: int = 2026):
     """Calculate impacts for all policy combinations"""
     # Set up baseline simulations first
     year = str(year)
-    print("Setting up baseline simulations...")
+    print_("Setting up baseline simulations...")
     baseline_sim = Microsimulation(dataset="enhanced_cps_2024")
     baseline_data = get_baseline_data(baseline_sim, year)
 
@@ -1625,8 +1627,8 @@ def calculate_impacts(year: int = 2026):
     combinations = generate_policy_combinations()
     total_combinations = len(combinations)
 
-    print(f"Processing {total_combinations} policy combinations...")
-    print(f"Already completed: {len(completed_reforms)} combinations")
+    print_(f"Processing {total_combinations} policy combinations...")
+    print_(f"Already completed: {len(completed_reforms)} combinations")
 
     for i, (salt_config, amt_config, behavioral, tcja_other_extended) in enumerate(
         combinations, 1
@@ -1638,12 +1640,12 @@ def calculate_impacts(year: int = 2026):
         )
 
         if scenario_name in completed_reforms:
-            print(
+            print_(
                 f"Skipping completed combination {i}/{total_combinations}: {scenario_name}"
             )
             continue
 
-        print(f"Processing combination {i}/{total_combinations}: {scenario_name}")
+        print_(f"Processing combination {i}/{total_combinations}: {scenario_name}")
 
         try:
             # Create and run reform
@@ -1678,36 +1680,36 @@ def calculate_impacts(year: int = 2026):
             impacts_df.to_csv(f"impacts_{year}.csv", index=False)
             upload(
                 f"impacts_{year}.csv",
-                "nikhilwoodruff/salt-amt-data",
+                "nikhil-woodruff/salt-amt-data",
                 f"impacts_{year}.csv",
             )
             completed_reforms.add(scenario_name)
-            print(f"Saved checkpoint after {scenario_name}")
+            print_(f"Saved checkpoint after {scenario_name}")
 
         except Exception as e:
-            print(f"Error processing {scenario_name}: {str(e)}")
+            print_(f"Error processing {scenario_name}: {str(e)}")
             continue
 
     return pd.DataFrame(impacts)
 
 if __name__ == "__main__":
-    print("Starting tax reform impact calculations...")
+    print_("Starting tax reform impact calculations...")
 
     year = os.environ["YEAR"]
 
     try:
         # Calculate impacts
         impacts_df = calculate_impacts(year)
-        print("\nCalculation complete!")
-        print(f"Results saved to impacts.csv")
+        print_("\nCalculation complete!")
+        print_(f"Results saved to impacts.csv")
 
         # Print summary statistics
-        print("\nSummary:")
-        print(
+        print_("\nSummary:")
+        print_(
             f"Total scenarios processed: {len(impacts_df) // 2}"
         )  # Divide by 2 because each scenario has two baselines
-        print(f"Total baseline comparisons: {len(impacts_df)}")
+        print_(f"Total baseline comparisons: {len(impacts_df)}")
 
     except Exception as e:
-        print(f"\nError in main execution: {str(e)}")
+        print_(f"\nError in main execution: {str(e)}")
         raise
