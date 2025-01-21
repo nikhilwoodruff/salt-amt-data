@@ -1699,7 +1699,7 @@ if __name__ == "__main__":
 
     try:
         # Calculate impacts
-        impacts_df = calculate_impacts(args.year)
+        impacts_df = calculate_impacts(year)
         print("\nCalculation complete!")
         print(f"Results saved to impacts.csv")
 
