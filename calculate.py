@@ -1686,8 +1686,6 @@ def calculate_impacts(year: int = 2026):
 
         except Exception as e:
             print(f"Error processing {scenario_name}: {str(e)}")
-            with open("../data/error_log.txt", "a") as f:
-                f.write(f"\nError on {scenario_name}: {str(e)}")
             continue
 
     return pd.DataFrame(impacts)
@@ -1712,6 +1710,4 @@ if __name__ == "__main__":
 
     except Exception as e:
         print(f"\nError in main execution: {str(e)}")
-        with open("../data/error_log.txt", "a") as f:
-            f.write(f"\nError in main execution: {str(e)}")
         raise
